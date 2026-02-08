@@ -7,7 +7,6 @@
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="FIFI Flight">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>✈️</text></svg>">
 
     <style>
@@ -17,107 +16,58 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: none; }
 
-        body {
-            background: #000;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+        body { background: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; }
 
         #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh; /* Changed from 700px to full screen */
-            max-width: 500px; /* Optional cap for desktop viewing */
-            background: var(--day-bg);
-            transition: background 2s ease-in-out;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative; width: 100vw; height: 100vh; max-width: 500px;
+            background: var(--day-bg); transition: background 2s;
         }
 
-        /* Adjusted UI for different screen heights */
         .top-ui {
-            position: absolute;
-            top: env(safe-area-inset-top, 20px);
-            padding-top: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 200;
+            position: absolute; top: env(safe-area-inset-top, 20px); width: 100%;
+            display: flex; justify-content: space-around; padding-top: 20px; z-index: 200;
         }
 
         .stat-box {
-            background: rgba(0,0,0,0.6);
-            padding: 10px 18px;
-            border-radius: 25px;
-            border: 1px solid rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            color: white;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        #pause-btn {
-            background: rgba(255,255,255,0.2); border: 1px solid white; color: white;
-            width: 50px; height: 50px; border-radius: 50%; cursor: pointer; font-size: 1.4rem;
-            display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.6); padding: 10px 18px; border-radius: 25px;
+            color: white; font-weight: bold; font-size: 1.1rem; backdrop-filter: blur(5px);
         }
 
         #plane {
-            position: absolute;
-            left: 50px;
-            top: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 50px;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: filter 0.3s;
+            position: absolute; left: 60px; top: 50%; width: 50px; height: 50px;
+            font-size: 45px; z-index: 100; display: flex; align-items: center; justify-content: center;
         }
 
-        #celestial {
-            position: absolute; width: 120px; height: 120px; font-size: 100px;
-            top: 80px; left: 80%; transform: translateX(-50%); z-index: 1;
-            display: flex; align-items: center; justify-content: center;
+        .obstacle {
+            position: absolute; width: 80px; z-index: 5; background: #fff;
+            border: 3px solid #333; border-radius: 8px;
         }
 
-        .obstacle { position: absolute; width: 90px; z-index: 5; border-radius: 20px; background: white; border: 2px solid #eee; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
-        .item { position: absolute; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 40px; z-index: 6; }
-
-        .menu-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; color: white; }
-        .btn-main { background: var(--p); color: white; padding: 20px 60px; border-radius: 50px; border: none; font-weight: 800; cursor: pointer; font-size: 1.5rem; margin-top: 20px; box-shadow: 0 10px 20px rgba(255, 77, 109, 0.4); }
-
-        #stage-announcer {
-            position: absolute; width: 100%; top: 40%; text-align: center;
-            z-index: 500; pointer-events: none; opacity: 0; transform: scale(0.8);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .menu-overlay {
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.8);
+            z-index: 300; display: flex; flex-direction: column; align-items: center;
+            justify-content: center; color: white;
         }
-        #stage-announcer.show { opacity: 1; transform: scale(1.1); }
+
+        .btn-main {
+            background: var(--p); color: white; padding: 15px 40px; border-radius: 30px;
+            border: none; font-weight: 800; font-size: 1.5rem; margin-top: 20px;
+        }
     </style>
 </head>
-<body onmousedown="handleInput()" ontouchstart="handleInput()">
+<body onmousedown="handleInput(event)" ontouchstart="handleInput(event)">
 
 <div id="game-container">
-    <div id="star-container"></div>
-    <div id="stage-announcer">
-        <h2 id="stage-title" style="color:var(--y); font-size: 2rem; text-shadow: 0 0 20px rgba(0,0,0,0.5);"></h2>
-        <p id="stage-desc" style="color: white; font-size: 1.2rem;"></p>
-    </div>
-    <div id="celestial" class="sun-glow">☀️</div>
+    <div id="celestial" style="position:absolute; top:80px; right:20%; font-size:80px;">☀️</div>
     <div class="top-ui">
         <div class="stat-box">💖 <span id="wallet">0</span></div>
-        <button id="pause-btn" onclick="togglePause(event)">⏸️</button>
         <div class="stat-box">📍 <span id="distance">1000</span></div>
     </div>
     <div id="plane">✈️</div>
     <div id="menu" class="menu-overlay">
-        <h1 id="menu-title" style="color:var(--p); font-size: 2.5rem; margin-bottom: 10px;">FIFI FLIGHT</h1>
-        <p style="font-size: 1.2rem; opacity: 0.8;">Tap to fly to him.</p>
-        <button class="btn-main" onclick="startGame()">START</button>
+        <h1 style="font-size: 3rem; color: var(--y);">FIFI FLIGHT</h1>
+        <p>TAP TO BOUNCE</p>
+        <button class="btn-main" onclick="startGame(event)">START</button>
     </div>
 </div>
 
@@ -126,141 +76,112 @@
         walletDisplay = document.getElementById('wallet'),
         distDisplay = document.getElementById('distance'),
         menu = document.getElementById('menu'),
-        container = document.getElementById('game-container'),
-        celestial = document.getElementById('celestial'),
-        announcer = document.getElementById('stage-announcer'),
-        stageTitle = document.getElementById('stage-title'),
-        stageDesc = document.getElementById('stage-desc'),
-        pauseBtn = document.getElementById('pause-btn');
+        container = document.getElementById('game-container');
 
-    let planeY, velocity, gameActive, isPaused = false, distance = 1000, frame, animationId, hearts = 0, obstacles = [];
-    let shieldTimer = 0, magnetTimer = 0;
+    let planeY, velocity, gameActive = false, distance = 1000, frame = 0, hearts = 0, obstacles = [];
 
-    // --- ADJUST PHYSICS HERE ---
-    let gravity = 0.25;      // How fast you fall
-    let jumpImpulse = -5.5;  // How high you jump
-    let scrollSpeed = 3.5;   // How fast obstacles move
-    // ---------------------------
+    // --- FLAPPY PHYSICS CONSTANTS ---
+    const GRAVITY = 0.4;        // Heavy fall
+    const JUMP = -7.5;          // Sharp pop up
+    const SCROLL_SPEED = 3.8;   // Fast movement
+    const GAP = 220;            // Tight gaps for difficulty
+    // --------------------------------
 
-    const stageData = [
-        { name: "Clear Skies", desc: "A peaceful start ☁️", obs: "☁️" },
-        { name: "Whispering Winds", desc: "Picking up speed... 🌬️", obs: "☁️" },
-        { name: "Cumulus Climb", desc: "Watch out! 🎈", obs: "☁️" },
-        { name: "Dusk Drifter", desc: "Golden hour 🌅", obs: "☁️" },
-        { name: "Starlight Path", desc: "Twinkle twinkle ✨", obs: "⭐" },
-        { name: "Galaxy Crossing", desc: "Deep space 🌌", obs: "🫧" },
-        { name: "Silver Lining", desc: "Stay strong! 💪", obs: "🫧" },
-        { name: "Aurora Breeze", desc: "Magic air 🌈", obs: "✨" },
-        { name: "Heaven's Gate", desc: "Almost there! 🕊️", obs: "✨" },
-        { name: "Homeward Bound", desc: "Coming home to you ❤️", obs: "🌸" }
-    ];
-
-    function handleInput() { if (gameActive && !isPaused) velocity = jumpImpulse; }
-
-    function togglePause(e) {
-        e.stopPropagation();
-        if (!gameActive) return;
-        isPaused = !isPaused;
-        pauseBtn.innerText = isPaused ? "▶️" : "⏸️";
-        if (!isPaused) loop();
-    }
-
-    function announceStage() {
-        let stageIdx = 9 - Math.floor(distance / 100);
-        if (stageIdx >= 0 && stageIdx < 10 && stageIdx !== currentStage) {
-            currentStage = stageIdx;
-            stageTitle.innerText = stageData[currentStage].name;
-            stageDesc.innerText = stageData[currentStage].desc;
-            announcer.classList.add('show');
-            setTimeout(() => announcer.classList.remove('show'), 2000);
+    function handleInput(e) {
+        if (e.target.tagName === 'BUTTON') return;
+        if (gameActive) {
+            velocity = JUMP;
         }
     }
 
-    let currentStage = -1;
-
-    function startGame() {
-        gameActive = true; isPaused = false; menu.style.display = 'none';
-        planeY = container.offsetHeight / 2; velocity = 0; frame = 0; distance = 1000;
-        hearts = 0; walletDisplay.innerText = "0"; currentStage = -1;
-        document.querySelectorAll('.obstacle, .item').forEach(el => el.remove());
-        obstacles = []; announceStage(); loop();
+    function startGame(e) {
+        e.stopPropagation();
+        gameActive = true;
+        menu.style.display = 'none';
+        planeY = container.offsetHeight / 2;
+        velocity = 0;
+        distance = 1000;
+        hearts = 0;
+        frame = 0;
+        walletDisplay.innerText = "0";
+        document.querySelectorAll('.obstacle').forEach(el => el.remove());
+        obstacles = [];
+        loop();
     }
 
     function spawn() {
-        if (isPaused) return;
         const screenH = container.offsetHeight;
-        const h = Math.random() * (screenH * 0.4) + 100;
-        const gap = 250;
-        let obsEmoji = stageData[currentStage]?.obs || "☁️";
+        const minPipeHeight = 100;
+        const pipeH = Math.random() * (screenH - GAP - (minPipeHeight * 2)) + minPipeHeight;
 
-        const top = document.createElement('div'); top.className = 'obstacle'; top.style.height = h + 'px'; top.style.top = '0'; top.style.left = '100%'; top.innerText = obsEmoji;
-        const bottom = document.createElement('div'); bottom.className = 'obstacle'; bottom.style.height = (screenH - h - gap) + 'px'; bottom.style.bottom = '0'; bottom.style.left = '100%'; bottom.innerText = obsEmoji;
+        const top = document.createElement('div');
+        top.className = 'obstacle';
+        top.style.height = pipeH + 'px';
+        top.style.top = '0';
+        top.style.left = '100%';
 
-        container.appendChild(top); container.appendChild(bottom);
-        obstacles.push({ type: 'pipe', top, bottom, x: container.offsetWidth, h, gap });
+        const bottom = document.createElement('div');
+        bottom.className = 'obstacle';
+        bottom.style.height = (screenH - pipeH - GAP) + 'px';
+        bottom.style.bottom = '0';
+        bottom.style.left = '100%';
 
-        // Spawn items
-        if (Math.random() > 0.4) {
-            const itemEl = document.createElement('div'); itemEl.className = 'item';
-            let r = Math.random();
-            let kind = r > 0.95 ? '🛡️' : (r > 0.90 ? '🧲' : '💖');
-            itemEl.innerText = kind;
-            let itemY = h + (gap/2) - 25;
-            container.appendChild(itemEl);
-            obstacles.push({ type: 'item', el: itemEl, x: container.offsetWidth + 100, worldY: itemY, kind });
-        }
+        container.appendChild(top);
+        container.appendChild(bottom);
+        obstacles.push({ x: container.offsetWidth, h: pipeH, top, bottom });
     }
 
     function loop() {
-        if (!gameActive || isPaused) return;
+        if (!gameActive) return;
 
-        velocity += gravity;
+        velocity += GRAVITY;
         planeY += velocity;
+
+        // Tilt logic: nose up when jumping, nose down when falling
+        let rotation = Math.max(-25, Math.min(velocity * 4, 90));
         plane.style.top = planeY + 'px';
-        plane.style.transform = `rotate(${velocity * 4}deg)`;
+        plane.style.transform = `rotate(${rotation}deg)`;
 
-        // Background transition
-        let phase = Math.floor(distance / 333) % 3;
-        if (phase === 0) { container.style.backgroundColor = "var(--day-bg)"; celestial.innerText = "☀️"; }
-        else if (phase === 1) { container.style.backgroundColor = "var(--sunset-bg)"; celestial.innerText = "🌅"; }
-        else { container.style.backgroundColor = "var(--night-bg)"; celestial.innerText = "🌙"; }
+        // Death conditions
+        if (planeY < 0 || planeY > container.offsetHeight - 40) return gameOver();
 
-        if (planeY < 0 || planeY > container.offsetHeight - 50) return gameOver();
-        if (frame++ % 90 === 0) spawn();
+        if (frame++ % 80 === 0) spawn();
 
         for (let i = obstacles.length - 1; i >= 0; i--) {
-            let o = obstacles[i]; o.x -= scrollSpeed;
+            let o = obstacles[i];
+            o.x -= SCROLL_SPEED;
+            o.top.style.left = o.x + 'px';
+            o.bottom.style.left = o.x + 'px';
 
-            if (o.type === 'item') {
-                o.el.style.left = o.x + 'px'; o.el.style.top = o.worldY + 'px';
-                if (o.x < 110 && o.x > 40 && Math.abs(planeY - o.worldY) < 50) {
-                    if (o.kind === '💖') { hearts++; walletDisplay.innerText = hearts; }
-                    else if (o.kind === '🛡️') shieldTimer = 400;
-                    else if (o.kind === '🧲') magnetTimer = 400;
-                    o.el.remove(); obstacles.splice(i, 1);
-                }
-            } else {
-                o.top.style.left = o.x + 'px'; o.bottom.style.left = o.x + 'px';
-                if (o.x < 100 && o.x > 30) {
-                    if (planeY < o.h || planeY > (o.h + o.gap - 50)) return gameOver();
-                }
+            // Precise Collision
+            if (o.x < 100 && o.x > 20) {
+                if (planeY < o.h || planeY > (o.h + GAP - 40)) return gameOver();
             }
+
             if (o.x < -100) {
-                if (o.type === 'item') o.el.remove();
-                else { o.top.remove(); o.bottom.remove(); }
+                o.top.remove(); o.bottom.remove();
                 obstacles.splice(i, 1);
             }
         }
 
-        if (frame % 40 === 0) { distance--; distDisplay.innerText = distance; announceStage(); }
+        if (frame % 40 === 0) {
+            distance--;
+            distDisplay.innerText = distance;
+        }
+
         if (distance <= 0) return win();
-        animationId = requestAnimationFrame(loop);
+        requestAnimationFrame(loop);
     }
 
-    function gameOver() { gameActive = false; cancelAnimationFrame(animationId); menu.style.display = 'flex'; }
+    function gameOver() {
+        gameActive = false;
+        menu.innerHTML = `<h1 style="color:var(--p);">CRASHED!</h1><button class="btn-main" onclick="location.reload()">RETRY</button>`;
+        menu.style.display = 'flex';
+    }
+
     function win() {
-        gameActive = false; cancelAnimationFrame(animationId);
-        menu.innerHTML = `<h1 style="color:var(--y);">YOU FOUND HIM! ❤️</h1><button class="btn-main" onclick="location.reload()">FLY AGAIN</button>`;
+        gameActive = false;
+        menu.innerHTML = `<h1 style="color:var(--y);">YOU MADE IT! ❤️</h1><button class="btn-main" onclick="location.reload()">FLY AGAIN</button>`;
         menu.style.display = 'flex';
     }
 </script>
