@@ -16,39 +16,55 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; overflow: hidden; touch-action: none; }
 
-        body { background: #000; height: 100vh; width: 100vw; display: flex; justify-content: center; align-items: center; }
+        body {
+            background: #000; height: 100vh; width: 100vw;
+            display: flex; justify-content: center; align-items: center;
+            perspective: 1000px;
+        }
 
         #game-container {
             position: relative; width: 100vw; height: 100vh; max-width: 420px;
-            background: var(--day-bg); border-radius: 0; border: none;
+            background: var(--day-bg);
             transition: background 2s ease-in-out;
+            transform-style: preserve-3d;
         }
 
         #star-container { position: absolute; inset: 0; opacity: 0; pointer-events: none; z-index: 0; transition: opacity 2s; }
         .star { position: absolute; background: white; border-radius: 50%; width: 2px; height: 2px; }
 
-        .top-ui { position: absolute; top: 30px; width: 100%; display: flex; justify-content: space-around; align-items: center; z-index: 200; }
+        .top-ui { position: absolute; top: 30px; width: 100%; display: flex; justify-content: space-around; align-items: center; z-index: 200; transform: translateZ(50px); }
         .stat-box { background: rgba(0,0,0,0.6); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); color: white; font-weight: bold; }
 
-        #pause-btn {
-            background: rgba(255,255,255,0.2); border: 1px solid white; color: white;
-            width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 1.2rem;
-            display: flex; align-items: center; justify-content: center;
+        #plane {
+            position: absolute; left: 50px; top: 300px; width: 50px; height: 50px;
+            font-size: 45px; z-index: 100; display: flex; align-items: center; justify-content: center;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.3));
         }
 
-        #plane { position: absolute; left: 50px; top: 300px; width: 50px; height: 50px; font-size: 40px; z-index: 100; display: flex; align-items: center; justify-content: center; }
-        .shield-active { filter: drop-shadow(0 0 15px var(--g)); }
-        .magnet-active { filter: drop-shadow(0 0 15px var(--s)); }
+        .obstacle {
+            position: absolute; width: 95px; z-index: 5; border-radius: 15px;
+            background: linear-gradient(90deg, #fff 0%, #e0e0e0 50%, #bbb 100%);
+            border: 2px solid white; display: flex; align-items: center; justify-content: center;
+            color: #95a5a6; font-size: 1.5rem;
+            box-shadow: 15px 0 30px rgba(0,0,0,0.2), inset -5px 0 10px rgba(0,0,0,0.1);
+        }
 
-        .obstacle { position: absolute; width: 95px; z-index: 5; border-radius: 30px; background: linear-gradient(#fdfbfb, #ebedee); border: 2px solid white; display: flex; align-items: center; justify-content: center; color: #95a5a6; font-size: 1.5rem; }
-        .item { position: absolute; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 35px; z-index: 6; }
+        .item {
+            position: absolute; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 35px; z-index: 6;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+            animation: float 2s infinite ease-in-out;
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
         .menu-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 25px; color: white; }
         .btn-main { background: var(--p); color: white; padding: 18px 50px; border-radius: 50px; border: none; font-weight: 800; cursor: pointer; font-size: 1.3rem; margin-top: 15px; }
 
         #stage-announcer {
             position: absolute; width: 100%; top: 35%; text-align: center;
-            z-index: 500; pointer-events: none; opacity: 0; transform: translateY(20px);
+            z-index: 500; pointer-events: none; opacity: 0;
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         #stage-announcer.show { opacity: 1; transform: translateY(0); }
@@ -62,17 +78,16 @@
         <h2 id="stage-title" style="color:var(--y); text-transform:uppercase; letter-spacing:3px;"></h2>
         <p id="stage-desc" style="font-style:italic; opacity:0.9;"></p>
     </div>
-    <div id="celestial" style="position: absolute; width: 120px; height: 120px; font-size: 100px; top: 60px; left: 80%; transform: translateX(-50%); z-index: 1; display: flex; align-items: center; justify-content: center;">☀️</div>
+    <div id="celestial" style="position: absolute; width: 120px; height: 120px; font-size: 100px; top: 60px; left: 80%; transform: translateX(-50%) translateZ(-100px); z-index: 1; display: flex; align-items: center; justify-content: center;">☀️</div>
     <div class="top-ui">
         <div class="stat-box">💖 <span id="wallet">0</span></div>
-        <button id="pause-btn" onclick="togglePause(event)">⏸️</button>
         <div class="stat-box">📍 <span id="distance">1000</span>mi</div>
     </div>
     <div id="plane">✈️</div>
     <div id="menu" class="menu-overlay">
-        <h1 id="menu-title" style="color:var(--p);">FIFI misses you.</h1>
-        <p>Fly to him.</p>
-        <button class="btn-main" onclick="startGame(event)">START FLIGHT</button>
+        <h1 style="color:var(--p); font-size: 2.5rem;">FIFI FLIGHT</h1>
+        <p>Short, snappy hops home.</p>
+        <button class="btn-main" onclick="startGame(event)">START</button>
     </div>
 </div>
 
@@ -86,21 +101,19 @@
         starField = document.getElementById('star-container'),
         announcer = document.getElementById('stage-announcer'),
         stageTitle = document.getElementById('stage-title'),
-        stageDesc = document.getElementById('stage-desc'),
-        pauseBtn = document.getElementById('pause-btn');
+        stageDesc = document.getElementById('stage-desc');
 
-    let planeY, velocity, gameActive = false, isPaused = false, distance = 1000, frame = 0, hearts = 0, obstacles = [];
+    let planeY, velocity, gameActive = false, distance = 1000, frame = 0, hearts = 0, obstacles = [];
     let shieldTimer = 0, magnetTimer = 0, currentStage = -1;
 
-    // --- SNAPPY FLAPPY PHYSICS ---
-    const GRAVITY = 0.42;
-    const JUMP = -8.0;
+    // --- CALIBRATED PHYSICS ---
+    const GRAVITY = 0.45;
+    const JUMP = -6.5; // Tuned for smaller, precise jumps
     const SCROLL_SPEED = 4.2;
-    // ----------------------------
 
     const stageData = [
         { name: "Clear Skies", desc: "A peaceful start ☁️", obs: "☁️" },
-        { name: "Whispering Winds", desc: "The clouds are waking up... 🌬️", obs: "☁️" },
+        { name: "Whispering Winds", desc: "Picking up speed... 🌬️", obs: "☁️" },
         { name: "Cumulus Climb", desc: "Watch out for the wobbles! 🎈", obs: "☁️" },
         { name: "Dusk Drifter", desc: "The sun is getting sleepy 🌅", obs: "☁️" },
         { name: "Starlight Path", desc: "Twinkle twinkle little star ✨", obs: "⭐" },
@@ -118,23 +131,15 @@
     }
 
     function handleInput(e) {
-        if (e.target.id === 'pause-btn' || e.target.tagName === 'BUTTON') return;
-        if (gameActive && !isPaused) velocity = JUMP;
-    }
-
-    function togglePause(e) {
-        e.stopPropagation();
-        if (!gameActive) return;
-        isPaused = !isPaused;
-        pauseBtn.innerText = isPaused ? "▶️" : "⏸️";
-        if (!isPaused) loop();
+        if (e.target.tagName === 'BUTTON') return;
+        if (gameActive) velocity = JUMP;
     }
 
     function announceStage() {
         let stageIdx = 9 - Math.floor(distance / 100);
         if (stageIdx !== currentStage && stageIdx >= 0 && stageIdx < 10) {
             currentStage = stageIdx;
-            stageTitle.innerText = `Stage ${currentStage + 1}: ${stageData[currentStage].name}`;
+            stageTitle.innerText = stageData[currentStage].name;
             stageDesc.innerText = stageData[currentStage].desc;
             announcer.classList.add('show');
             setTimeout(() => announcer.classList.remove('show'), 3000);
@@ -143,22 +148,20 @@
 
     function startGame(e) {
         e.stopPropagation();
-        gameActive = true; isPaused = false; menu.style.display = 'none';
-        pauseBtn.innerText = "⏸️";
-        planeY = container.offsetHeight / 2; velocity = 0; frame = 0; distance = 1000; currentStage = -1;
-        shieldTimer = 0; magnetTimer = 0;
+        gameActive = true; menu.style.display = 'none';
+        planeY = container.offsetHeight / 2; velocity = 0; frame = 0; distance = 1000;
         document.querySelectorAll('.obstacle, .item').forEach(el => el.remove());
         obstacles = []; announceStage(); loop();
     }
 
     function spawn() {
-        if (isPaused) return;
-        const h = Math.floor(Math.random() * (container.offsetHeight * 0.4)) + 120;
+        const screenH = container.offsetHeight;
+        const h = Math.floor(Math.random() * (screenH * 0.4)) + 120;
         const gap = 260;
         let obsEmoji = stageData[currentStage]?.obs || "☁️";
 
         const top = document.createElement('div'); top.className = 'obstacle'; top.style.height = h + 'px'; top.style.top = '0'; top.style.left = '100%'; top.innerText = obsEmoji;
-        const bottom = document.createElement('div'); bottom.className = 'obstacle'; bottom.style.height = (container.offsetHeight - h - gap) + 'px'; bottom.style.bottom = '0'; bottom.style.left = '100%'; bottom.innerText = obsEmoji;
+        const bottom = document.createElement('div'); bottom.className = 'obstacle'; bottom.style.height = (screenH - h - gap) + 'px'; bottom.style.bottom = '0'; bottom.style.left = '100%'; bottom.innerText = obsEmoji;
 
         container.appendChild(top); container.appendChild(bottom);
         obstacles.push({ type: 'pipe', top, bottom, x: container.offsetWidth, h, gap });
@@ -174,16 +177,13 @@
     }
 
     function loop() {
-        if (!gameActive || isPaused) return;
+        if (!gameActive) return;
         velocity += GRAVITY;
         planeY += velocity;
-        plane.style.top = planeY + 'px';
-        plane.style.transform = `rotate(${Math.max(-20, Math.min(velocity * 3, 90))}deg)`;
 
-        if (shieldTimer > 0) { shieldTimer--; plane.classList.add('shield-active'); }
-        else { plane.classList.remove('shield-active'); }
-        if (magnetTimer > 0) { magnetTimer--; plane.classList.add('magnet-active'); }
-        else { plane.classList.remove('magnet-active'); }
+        let pitch = Math.max(-20, Math.min(velocity * 3, 90));
+        plane.style.top = planeY + 'px';
+        plane.style.transform = `rotateZ(${pitch}deg) translateZ(20px)`;
 
         let phase = Math.floor(distance / 333) % 3;
         if (phase === 0) { container.style.backgroundColor = "var(--day-bg)"; celestial.innerHTML = "☀️"; starField.style.opacity = "0"; }
@@ -197,23 +197,15 @@
             let o = obstacles[i]; o.x -= SCROLL_SPEED;
 
             if (o.type === 'item') {
-                if (magnetTimer > 0 && o.kind === '💖') {
-                    o.x += (50 - o.x) * 0.1; o.worldY += (planeY - o.worldY) * 0.1;
-                }
                 o.el.style.left = o.x + 'px'; o.el.style.top = o.worldY + 'px';
                 if (o.x < 100 && o.x > 10 && Math.abs(planeY - o.worldY) < 50) {
                     if (o.kind === '💖') { hearts++; walletDisplay.innerText = hearts; }
-                    else if (o.kind === '🛡️') shieldTimer = 600;
-                    else if (o.kind === '🧲') magnetTimer = 600;
                     o.el.remove(); obstacles.splice(i, 1);
                 }
             } else {
                 o.top.style.left = o.x + 'px'; o.bottom.style.left = o.x + 'px';
                 if (o.x < 100 && o.x > 30) {
-                    if (planeY < o.h || planeY > (o.h + o.gap - 40)) {
-                        if (shieldTimer > 0) { shieldTimer = 0; o.top.remove(); o.bottom.remove(); obstacles.splice(i, 1); }
-                        else { gameOver(); return; }
-                    }
+                    if (planeY < o.h || planeY > (o.h + o.gap - 40)) { gameOver(); return; }
                 }
             }
             if (o.x < -120) { if (o.type === 'item') o.el.remove(); else { o.top.remove(); o.bottom.remove(); } obstacles.splice(i, 1); }
