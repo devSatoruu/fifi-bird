@@ -1,0 +1,19 @@
+# OS Metadata
+.DS_Store
+Thumbs.db
+
+# Editor / IDE folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary logs
+*.log
+npm-debug.log*
+
+# Large Assets (Optional)
+# If you ever use giant 4K videos or raw audio,
+# you might want to ignore them and host them elsewhere.
+# *.psd
+# *.raw
